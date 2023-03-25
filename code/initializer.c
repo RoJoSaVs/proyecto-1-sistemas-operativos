@@ -1,37 +1,28 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/shm.h>
+
 #include "colorConf.c"
 
 
-
+//Program 1: This program creates a shared memory segment, attaches itself to it and then writes some content into the shared memory segment.
 int main(){
-    red();
-    printf("1. Message in red\n");
-    
-    bold_red();
-    printf("2. Message in bold_red\n");
-    
-    yellow();
-    printf("3. Message in yellow\n");
-    
-    green();
-    printf("4. Message in green\n");
-    
-    bold_green();
-    printf("5. Message in bold_green\n");
-    
-    blue();
-    printf("6. Message in blue\n");
-    
-    bold_blue();
-    printf("7. Message in bold_blue\n");
+    int i;
+    void *shared_memory;
+    char buff[100];
+    int shmid;
 
-    reset();
-    printf("8. Message in reset\n");
+    shmid = shmget((key_t)2345, 1024, 0666|IPC_CREAT); //creates shared memory segment with key 2345, having size 1024 bytes. IPC_CREAT is used to create the shared segment if it does not exist. 0666 are the permisions on the shared segment
+    printf("Key of shared memory is %d\n",shmid);
 
-    cyan();
-    printf("9. Message in cyan\n");
+    shared_memory = shmat(shmid, NULL, 0); //process attached to shared memory segment
+    printf("Process attached at %p\n",shared_memory); //this prints the address where the segment is attached with this process
+    printf("Enter some data to write to shared memory\n");
+    
+    read(0, buff, 100); //get some input from user
+    strcpy(shared_memory, buff); //data written to shared memory
 
-    purple();
-    printf("10. Message in purple\n");
-	return 0;
+    printf("You wrote : %s\n", (char *)shared_memory);
 }

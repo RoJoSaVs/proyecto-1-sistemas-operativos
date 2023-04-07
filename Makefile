@@ -2,6 +2,11 @@ all: build
 
 build: # Compile all files needed to run the project
 	gcc code/initializer.c -o output/initializer
+	# gcc code/test.c -o output/test
+	# ./output/test
+	clear
+	./output/initializer CE 10 5
+
 
 
 

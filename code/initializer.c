@@ -49,6 +49,53 @@ struct controlStats defaultValues(int keyValue)
     return initialControlStats;
 }
 
+int fileDataToSharedMemory()
+{
+    // =================================================================================== //
+    // Reading content from file: https://www.tutorialkart.com/c-programming/c-read-text-file/
+    FILE    *textfile;
+    char    *text;
+    long    numbytes;
+    
+    textfile = fopen("code/file.txt", "r");
+    if(textfile == NULL)
+    {
+        return 1;
+    }
+    
+    fseek(textfile, 0L, SEEK_END);
+    numbytes = ftell(textfile);
+    fseek(textfile, 0L, SEEK_SET);  
+
+    text = (char*)calloc(numbytes, sizeof(char));   
+    if(text == NULL)
+    {
+        return 1;
+    }
+
+    fread(text, sizeof(char), numbytes, textfile);
+    fclose(textfile);
+
+    // =================================================================================== //
+    // Data from file to shared memory
+
+    int shm_text; //file descriptor of shared memory file
+    void *sharedText;
+    char *sharedTextName = "textMemory";
+
+    shm_text = shm_open(sharedTextName, O_CREAT | O_RDWR, 0666); // Shared memory for data
+
+    ftruncate(shm_text, sizeof(char[numbytes])); // Configure the size of the shared memory block
+    
+    
+    sharedText = mmap(0, sizeof(char[numbytes]), PROT_READ | PROT_WRITE, MAP_SHARED, shm_text, 0);
+
+    sem_t *semSharedText;
+    semSharedText = sem_open("textFromFile", O_CREAT, 0666, 1);
+    
+    return 0;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -59,10 +106,18 @@ int main(int argc, char *argv[])
     
     else
     {
+        int keepProcess = fileDataToSharedMemory();
+        if(keepProcess != 0)
+        {
+            return 0;
+        }
+        // =================================================================================== //
+        // Shared memory code section for processing
         char *shareMemoryName; // Name given to the shared memory space 
         char *spacesToReadChar; // Total of spaces to write and read values (char)
         char *keyValueChar; // Key value to encription (char)
         
+        shareMemoryName = argv[1];
         spacesToReadChar = argv[2];
         keyValueChar = argv[3];
         

@@ -99,12 +99,25 @@ int main(int argc, char *argv[])
 
         // =================================================================================== //
         // Semaphores for critical region
+        char *semEmittersName = "filled";
+        sem_t *semEmitters; // For emitters control
+        semEmitters = sem_open(semEmittersName, O_CREAT, 0666, spacesToRead);
 
+        char *semReceiversName = "empty";
+        sem_t *semReceivers; // For receivers control
+        semReceivers = sem_open(semReceiversName, O_CREAT, 0666, 0);
 
-        
+        char *semStatsName = "stats";
+        sem_t *semStats; // Control to stats
+        semStats = sem_open(semStatsName, O_CREAT, 0666, 1);
 
-        
-
+        yellow();
+        printf("---------------------------------------------------------------\n");
+        bold_green();
+        printf(" Buffer has been created with %d spaces and the key value is %d\n", spacesToRead, keyValue);
+        yellow();
+        printf("---------------------------------------------------------------\n");
+        reset();
         
     }
 

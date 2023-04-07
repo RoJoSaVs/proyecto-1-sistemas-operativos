@@ -18,12 +18,3 @@ typedef struct controlStats
     int valuesReaded;
     int valuesInMemory;
 } controlStats;
-
-
-
-typedef struct semaphoresInfo
-{
-    sem_t semFilled;
-    sem_t semEmpty;
-    sem_t semStats;
-} semaphoresInfo;

@@ -1,28 +1,113 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <time.h>
 #include <unistd.h>
+
 #include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <semaphore.h>
+#include <stdbool.h>
+#include <math.h>
 
+// Local imports
 #include "colorConf.c"
+#include "infoStruct.c"
 
 
-//Program 1: This program creates a shared memory segment, attaches itself to it and then writes some content into the shared memory segment.
-int main(){
-    int i;
-    void *shared_memory;
-    char buff[100];
-    int shmid;
 
-    shmid = shmget((key_t)2345, 1024, 0666|IPC_CREAT); //creates shared memory segment with key 2345, having size 1024 bytes. IPC_CREAT is used to create the shared segment if it does not exist. 0666 are the permisions on the shared segment
-    printf("Key of shared memory is %d\n",shmid);
-
-    shared_memory = shmat(shmid, NULL, 0); //process attached to shared memory segment
-    printf("Process attached at %p\n",shared_memory); //this prints the address where the segment is attached with this process
-    printf("Enter some data to write to shared memory\n");
-    
-    read(0, buff, 100); //get some input from user
-    strcpy(shared_memory, buff); //data written to shared memory
-
-    printf("You wrote : %s\n", (char *)shared_memory);
+void errorMsg(){
+    yellow();
+    printf("--------------------------------------------------------\n");
+    cyan();
+    printf("Please insert the requested data\n");
+    printf(" 1 - Buffer name | Example: CE\n");
+    printf(" 2 - Letters to store at the same time | Example: 10\n");
+    printf(" 3 - Key value to encript data | Example: 5\n");
+    printf(" Example Command for execution: ./output/initializer CE 10 5 \n");
+    yellow();
+    printf("--------------------------------------------------------\n");
+    reset();
 }
+
+// Set the initial values of the struct containing the stats
+struct controlStats defaultValues(int keyValue)
+{
+    struct controlStats initialControlStats;
+
+    initialControlStats.memoryUsed = 0;
+    initialControlStats.keyValue = keyValue;
+    initialControlStats.totalEmitters = 0;
+    initialControlStats.totalReceivers = 0;
+    initialControlStats.emittersAlive = 0;
+    initialControlStats.receiversAlive = 0;
+    initialControlStats.valuesReaded = 0;
+    initialControlStats.valuesInMemory = 0;
+
+    return initialControlStats;
+}
+
+
+int main(int argc, char *argv[])
+{
+	if(argc != 4)
+    {
+        errorMsg();
+	}
+    
+    else
+    {
+        char *shareMemoryName; // Name given to the shared memory space 
+        char *spacesToReadChar; // Total of spaces to write and read values (char)
+        char *keyValueChar; // Key value to encription (char)
+        
+        spacesToReadChar = argv[2];
+        keyValueChar = argv[3];
+        
+        int spacesToRead; // Total of spaces to write and read values
+        int keyValue; // Key value to encription
+
+        spacesToRead = atoi(spacesToReadChar);
+        keyValue = atoi(keyValueChar);
+
+
+        // =================================================================================== //
+        // Info of shared memory for array
+        int shm_array; //file descriptor of shared memory file
+        void *sharedMemoryArray;
+        shm_array = shm_open(shareMemoryName, O_CREAT | O_RDWR, 0666); // Shared memory for data
+
+        ftruncate(shm_array, sizeof(struct charQueue[spacesToRead])); // Configure the size of the shared memory block
+        
+        struct charQueue *charArray; // Map the shared memory segment in process address space
+        charArray = mmap(0, sizeof(struct charQueue[spacesToRead]), PROT_READ | PROT_WRITE, MAP_SHARED, shm_array, 0);
+
+
+        // =================================================================================== //
+        // Shared memory for stats
+        int shm_stats;
+        void *sharedMemoryStats;
+        shm_stats = shm_open("shareStats", O_CREAT | O_RDWR, 0666); // Shared memory for stats with id "shareStats"
+
+        ftruncate(shm_stats, sizeof(struct controlStats));
+
+        struct controlStats *stats;
+        stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
+        *stats = defaultValues(keyValue);
+
+        // =================================================================================== //
+        // Semaphores for critical region
+
+
+        
+
+        
+
+        
+    }
+
+	return 0;
+
+};

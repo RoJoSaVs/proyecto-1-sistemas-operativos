@@ -89,6 +89,7 @@ int fileDataToSharedMemory()
     
     
     sharedText = mmap(0, sizeof(char[numbytes]), PROT_READ | PROT_WRITE, MAP_SHARED, shm_text, 0);
+    strcpy(sharedText, text);
 
     sem_t *semSharedText;
     semSharedText = sem_open("textFromFile", O_CREAT, 0666, 1);

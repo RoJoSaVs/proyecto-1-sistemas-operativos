@@ -33,12 +33,14 @@ void errorMsg(){
 }
 
 // Set the initial values of the struct containing the stats
-struct controlStats defaultValues(int keyValue)
+struct controlStats defaultValues(int keyValue, int spacesToRead, int inputTextSize)
 {
     struct controlStats initialControlStats;
 
     initialControlStats.memoryUsed = 0;
     initialControlStats.keyValue = keyValue;
+    initialControlStats.spacesToRead = spacesToRead;
+    initialControlStats.inputTextSize = inputTextSize;
     initialControlStats.totalEmitters = 0;
     initialControlStats.totalReceivers = 0;
     initialControlStats.emittersAlive = 0;
@@ -55,22 +57,22 @@ int fileDataToSharedMemory()
     // Reading content from file: https://www.tutorialkart.com/c-programming/c-read-text-file/
     FILE    *textfile;
     char    *text;
-    long    numbytes;
+    int    numbytes;
     
     textfile = fopen("code/file.txt", "r");
     if(textfile == NULL)
     {
-        return 1;
+        return 0;
     }
     
     fseek(textfile, 0L, SEEK_END);
     numbytes = ftell(textfile);
     fseek(textfile, 0L, SEEK_SET);  
 
-    text = (char*)calloc(numbytes, sizeof(char));   
+    text = (char*)calloc(numbytes, sizeof(char));
     if(text == NULL)
     {
-        return 1;
+        return 0;
     }
 
     fread(text, sizeof(char), numbytes, textfile);
@@ -94,7 +96,7 @@ int fileDataToSharedMemory()
     sem_t *semSharedText;
     semSharedText = sem_open("textFromFile", O_CREAT, 0666, 1);
     
-    return 0;
+    return numbytes;
 }
 
 
@@ -107,8 +109,8 @@ int main(int argc, char *argv[])
     
     else
     {
-        int keepProcess = fileDataToSharedMemory();
-        if(keepProcess != 0)
+        int inputTextSize = fileDataToSharedMemory();
+        if(inputTextSize == 0)
         {
             return 0;
         }
@@ -151,7 +153,7 @@ int main(int argc, char *argv[])
 
         struct controlStats *stats;
         stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
-        *stats = defaultValues(keyValue);
+        *stats = defaultValues(keyValue, spacesToRead, inputTextSize);
 
         // =================================================================================== //
         // Semaphores for critical region

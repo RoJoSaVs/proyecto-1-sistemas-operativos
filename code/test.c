@@ -31,15 +31,15 @@ int main()
         printf("Buffer doesn't exist\n");
         reset();
     }
-    // sharedText = mmap(0, sizeof(char[SizeOfTheStringInMemory]), PROT_READ | PROT_WRITE, MAP_SHARED, shm_text, 0);
-    sharedText = mmap(0, sizeof(char[100]), PROT_READ | PROT_WRITE, MAP_SHARED, shm_text, 0);
+    
+    sharedText = mmap(0, sizeof(char *), PROT_READ | PROT_WRITE, MAP_SHARED, shm_text, 0);
 
     // printf((char *) sharedText);
     char *stringFromMemory = (char *) sharedText;
 
     char ch;
 
-    for(int i = 0; i <= 100; i++) // 100 => SizeOfTheStringInMemory
+    for(int i = 0; i <= 574; i++) // 100 => SizeOfTheStringInMemory
     {
         ch = stringFromMemory[i];
         printf("%c", ch);

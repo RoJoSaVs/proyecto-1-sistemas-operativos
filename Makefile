@@ -12,7 +12,7 @@ build: # Compile all files needed to run the project
 
 receptor:
 	gcc code/Receptor.c -o output/Receptor -lpthread -lrt
-	./output/Receptor $(mode) $(key)
+	./output/Receptor $(mode) $(key) $(Name)
 
 
 reset: # Delete output files

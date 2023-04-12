@@ -19,6 +19,16 @@
 
 int main()
 {
+    int shm_stats;
+    void *sharedMemoryStats;
+    shm_stats = shm_open("shareStats", O_CREAT | O_RDWR, 0666); // Shared memory for stats with id "shareStats"
+
+    struct controlStats *stats;
+    stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
+
+
+    // printf("%d\n", stats->inputTextSize);
+
     int shm_text; //file descriptor of shared memory file
     void *sharedText;
     char *sharedTextName = "textMemory";
@@ -39,7 +49,7 @@ int main()
 
     char ch;
 
-    for(int i = 0; i <= 574; i++) // 100 => SizeOfTheStringInMemory
+    for(int i = 0; i <= stats->inputTextSize; i++) // 100 => SizeOfTheStringInMemory
     {
         ch = stringFromMemory[i];
         printf("%c", ch);

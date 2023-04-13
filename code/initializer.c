@@ -47,6 +47,9 @@ struct controlStats defaultValues(int keyValue, int spacesToRead, int inputTextS
     initialControlStats.receiversAlive = 0;
     initialControlStats.valuesReaded = 0;
     initialControlStats.valuesInMemory = 0;
+    initialControlStats.stringIndex = 0;
+    initialControlStats.emitterIndex = 0;
+    initialControlStats.receiverIndex = 0;
 
     return initialControlStats;
 }

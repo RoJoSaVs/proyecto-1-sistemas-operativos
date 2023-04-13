@@ -19,7 +19,7 @@ reset: # Delete output files
 	clear
 
 test: # Run the initializer
-	./output/initializer
+	./output/initializer CE 15 4
 
 test_finalizer: # Run the initializer
 	./output/finalizer

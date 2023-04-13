@@ -16,7 +16,25 @@
 #include "colorConf.c"
 #include "infoStruct.c"
 
-/*
+#include <SDL.h>
+
+// Access memory data
+void displayStats(struct controlStats *pStats) {
+    yellow();
+    printf("---------------------------------------------------------------\n");
+    bold_green();
+    printf(" Memory used %ld\n", pStats->memoryUsed);
+    printf(" Emitters Alive %d\n", pStats->emittersAlive);
+    printf(" Receivers Alive %d\n", pStats->receiversAlive);
+    printf(" Total Emmiters %d\n", pStats->totalEmitters);
+    printf(" Total Receivers %d\n", pStats->totalReceivers);
+    printf(" Amount of characters in shared memory %d\n", pStats->inputTextSize);
+    printf(" Values in memory %d\n", pStats->valuesInMemory);
+    yellow();
+    printf("---------------------------------------------------------------\n");
+    reset();
+}
+
 int main(int argc, char *argv[]) {
 
     // Open shared memory segment
@@ -26,23 +44,25 @@ int main(int argc, char *argv[]) {
     struct controlStats *stats = mmap(NULL, sizeof(struct controlStats), PROT_READ, MAP_SHARED, shm_id, 0);
 
     // Access memory data
-    int memory_used = stats->memoryUsed;
-
-    printf("Memory used: %d\n", memory_used);
+    displayStats(stats);
 
     // Release the resources used by the shared memory segment and unmap it from the process address space
     close(shm_id);
     munmap(stats, sizeof(struct controlStats));
 
+    // Access memory data
+    displayStats(stats);
+
 }
- */
 
-#include <SDL.h>
-
-
-
+/*
 int main(int argc, char* argv[])
 {
+    // Open shared memory segment
+    int shm_id = shm_open("shareStats", O_RDONLY, 0666);
+    // Map shared memory into the process
+    struct controlStats *stats = mmap(NULL, sizeof(struct controlStats), PROT_READ, MAP_SHARED, shm_id, 0);
+
     // Initialize SDL
     if (SDL_Init(SDL_INIT_GAMECONTROLLER) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -51,7 +71,7 @@ int main(int argc, char* argv[])
 
     // Check if there is at least one game controller available
     if (SDL_NumJoysticks() < 1) {
-        SDL_Log("No game controller detected");
+        SDL_Log("No game controller detected, please connect a controller");
         return 1;
     }
 
@@ -69,22 +89,14 @@ int main(int argc, char* argv[])
         // Poll for events
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
+                default:
+                    break;
                 case SDL_QUIT:
                     quit = 1;
                     break;
-                case SDL_CONTROLLERBUTTONDOWN:
-                    SDL_Log("Button %d down", event.cbutton.button);
-                    break;
                 case SDL_CONTROLLERBUTTONUP:
                     SDL_Log("Button %d up", event.cbutton.button);
-                    break;
-                case SDL_CONTROLLERAXISMOTION:
-                    if (event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX) {
-                        SDL_Log("Left stick X-axis motion: %d", event.caxis.value);
-                    }
-                    else if (event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY) {
-                        SDL_Log("Left stick Y-axis motion: %d", event.caxis.value);
-                    }
+                    displayStats(stats);
                     break;
             }
         }
@@ -95,3 +107,5 @@ int main(int argc, char* argv[])
     SDL_Quit();
     return 0;
 }
+*/
+

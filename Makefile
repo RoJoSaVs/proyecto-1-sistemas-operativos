@@ -1,9 +1,9 @@
 all: build
 
 build: # Compile all files needed to run the project
-	gcc code/initializer.c -o output/initializer
-	gcc code/emiter.c -o output/emitter
-	gcc code/test.c -o output/test
+	gcc code/initializer.c -o output/initializer -lpthread -lrt
+	gcc code/emitter.c -o output/emitter -lpthread -lrt
+	gcc code/test.c -o output/test -lpthread -lrt
 	
 	./output/initializer CE 10 5
 	./output/test
@@ -12,13 +12,13 @@ build: # Compile all files needed to run the project
 
 initializer:
 	clear
-	gcc code/initializer.c -o output/initializer
+	gcc code/initializer.c -o output/initializer -lpthread -lrt
 	./output/initializer CE 10 5
 	
 
 emitter:
 	clear
-	gcc code/emitter.c -o output/emitter
+	gcc code/emitter.c -o output/emitter -lpthread -lrt
 	./output/emitter CE auto 5
 
 
@@ -34,7 +34,7 @@ reset: # Delete output files
 
 
 test:
-	gcc code/getData.c -o output/getData
+	gcc code/getData.c -o output/getData -lpthread -lrt
 	./output/getData
 
 	# gcc code/test.c -o output/test

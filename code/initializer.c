@@ -164,6 +164,10 @@ int main(int argc, char *argv[])
         sem_t *semEmitters; // For emitters control
         semEmitters = sem_open(semEmittersName, O_CREAT, 0666, spacesToRead);
 
+        for(int i = 0; i < spacesToRead; i++){
+            sem_post(semEmitters);
+        }
+
         char *semReceiversName = "empty";
         sem_t *semReceivers; // For receivers control
         semReceivers = sem_open(semReceiversName, O_CREAT, 0666, 0);

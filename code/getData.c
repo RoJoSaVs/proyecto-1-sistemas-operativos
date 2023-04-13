@@ -73,8 +73,10 @@ int main()
         char ch = charArray[i].charValue ^ key;
         printf("%c", ch);
         printf("\n");
-        sem_post(semEmitters);
+        // sem_post(semEmitters);
     }
+
+    sem_close(semEmitters);
 
 
 

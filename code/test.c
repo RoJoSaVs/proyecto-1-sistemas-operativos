@@ -67,26 +67,32 @@ int main()
     setSemaphores(spacesToRead);
     setSharedMemory(spacesToRead);
 
-    for(int i = 0; i < spacesToRead; i++){
-        printf("%d -- %d", i, charArray[i].index);
-        printf(" ");
-        char ch = charArray[i].charValue ^ key;
-        printf("%c", ch);
-        printf("\n");
-        // sem_post(semEmitters);
-    }
-    // while (1)
-    // {
-        // printf("Down semaphores\n");
-        // sem_wait(semEmitters);
-        // sem_wait(semReceivers);
+    // for(int i = 0; i < spacesToRead; i++){
+    //     printf("%d -- %d", i, charArray[i].index);
+    //     printf(" ");
+    //     char ch = charArray[i].charValue ^ key;
+    //     printf("%c", ch);
+    //     printf("\n");
     // }
-    // sem_post(semStats);
+   
+    // Reset semaphores to original values after running initializer
+    while (1)
+    {
+        sem_trywait(semEmitters);
+        sem_trywait(semReceivers);
+        sem_trywait(semStats);
+        if((sem_trywait(semEmitters) == -1) && (sem_trywait(semReceivers) == -1) && (sem_trywait(semStats) == -1)){
+            break;
+        }
 
-    // sem_close(semEmitters);
-    // sem_close(semReceivers);
+    }
+    sem_post(semStats); // Let the semStast on 1
 
+    sem_close(semEmitters);
+    sem_close(semReceivers);
 
+    printf("Reset succesfull\n");
+    return 0;
 
 
 }

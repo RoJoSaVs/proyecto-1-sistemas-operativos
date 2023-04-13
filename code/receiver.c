@@ -154,17 +154,27 @@ void receiverLogic(int keyValue, int executionMode)
 
     int key = getDecimal(keyValue);
 
+    if(executionMode == 1){
+        green();
+        printf("Please press Enter for each loop\n");
+    }
+
+    yellow();
+    printf("+-----------------------------------------------------------------------------+\n");
+    bold_green();
+    printf("|     Index insertion     |     Value inserted     |    Date time inserted    |\n");
+    yellow();
+    printf("+-----------------------------------------------------------------------------+\n");
+
     for(receiverIndex = 0; receiverIndex <= stringSize; receiverIndex++)
     {
         // Manual execution code
         if(executionMode == 1){
-            green();
-            printf("Please press Enter: ");
             char ch = fgetc(stdin); //read a single character
             
             if(ch == 0x0A)
             {
-                printf("ENTER KEY is pressed.\n");
+                // printf("ENTER KEY is pressed.\n");
             }
         }
         else // Auto mode delay
@@ -198,7 +208,11 @@ void receiverLogic(int keyValue, int executionMode)
         sem_wait(semReceivers);
         cyan();
         ch = charArray[receiverIndex].charValue ^ key;
-        printf("Added %d    value in index %c   at date %s\n", charArray[receiverIndex].index, ch, charArray[receiverIndex].timeCreated);
+
+        yellow();
+        printf("+-----------------------------------------------------------------------------+\n");
+        cyan();
+        printf("|\t %-10d \t  |  \t %-10c \t   |  %20s    |\n", charArray[receiverIndex].index, ch, charArray[receiverIndex].timeCreated);
 
         sem_post(semEmitters);
 

@@ -6,6 +6,7 @@ build: # Compile all files needed to run the project
 	gcc code/finalizer.c -o output/finalizer -I /home/user/libs/include/SDL2 -L /home/user/libs/lib -lSDL2 -Wl,-rpath=/home/user/libs/lib
 
 
+
 initializer:
 	clear
 	gcc code/initializer.c -o output/initializer -lpthread -lrt
@@ -13,20 +14,22 @@ initializer:
 	
 
 emitter:
-	# ./output/emitter manual 5 CE
 	clear
 	gcc code/emitter.c -o output/emitter
-	./output/emitter auto 5 CE
+	./output/emitter manual 5 CE
+	# ./output/emitter auto 5 CE
 
 
 receiver:
-	# ./output/receiver manual 5 CE
 	clear
 	gcc code/receiver.c -o output/receiver
-	./output/receiver auto 5 CE
+	./output/receiver manual 5 CE
+	# ./output/receiver auto 5 CE
 
 
 reset: # Delete output files
+	gcc code/test.c -o output/test
+	./output/test
 	rm ./output/*
 	clear
 

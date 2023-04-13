@@ -86,7 +86,7 @@ void read_info (int key, char* shareMemoryName, char* mode){
     // printf((char *) sharedText);
     //char *stringFromMemory = (char *) sharedText;
     unsigned ch1;
-    int ch;
+    char ch;
     int pos;
     char time_data[20];
     int estado_leido=0;
@@ -100,10 +100,10 @@ void read_info (int key, char* shareMemoryName, char* mode){
         pos = charArray[estado_leido].index;
         time_data[20]=charArray[estado_leido].timeCreated;
         cyan();
-        printf("Valor leido: %d en la posicion: %d", ch,pos);
+        printf("Valor leido: %c en la posicion: %d", ch,pos);
         printf("\n");
         yellow();
-        printf("En el tiempo: %c ", time_data);
+        printf("En el tiempo: %s ", time_data);
         printf("\n");
 
         if(estado_leido== (stats->spacesToRead-1)){

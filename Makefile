@@ -15,9 +15,10 @@ initializer:
 	
 
 emitter:
+	# ./output/emitter manual 5 CE
 	clear
-	gcc code/emitter.c -o output/emitter -lpthread -lrt
-	./output/emitter CE auto 5
+	gcc code/emitter.c -o output/emitter
+	./output/emitter auto 5 CE
 
 
 receptor:

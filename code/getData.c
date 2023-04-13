@@ -75,8 +75,16 @@ int main()
         printf("\n");
         // sem_post(semEmitters);
     }
+    // while (1)
+    // {
+        // printf("Down semaphores\n");
+        // sem_wait(semEmitters);
+        // sem_wait(semReceivers);
+    // }
+    // sem_post(semStats);
 
-    sem_close(semEmitters);
+    // sem_close(semEmitters);
+    // sem_close(semReceivers);
 
 
 

@@ -138,32 +138,23 @@ int getDecimal(int clave)
     return dec_value;
 }
 
-void getDateTime(int index)
-{
-    time_t now = time(NULL);
-    struct tm *t = localtime(&now);
-    strftime(charArray[index].timeCreated, sizeof(charArray[index].timeCreated)-1, "%d %m %Y %X", t);
-}
 
-
-void emitterLogic(int keyValue, int executionMode)
+void receiverLogic(int keyValue, int executionMode)
 {
     int stringSize = 0;
-    int stringIndex = 0;
-    int emitterIndex = 0;
+    int receiverIndex = 0;
     int spacesToRead = 0;
 
     // Initial values for the first reading
     sem_wait(semStats);
     stringSize = stats->inputTextSize;
-    stringIndex = stats->stringIndex;
-    emitterIndex = stats->emitterIndex;
+    receiverIndex = stats->emitterIndex;
     spacesToRead = stats->spacesToRead;
     sem_post(semStats);
 
     int key = getDecimal(keyValue);
 
-    for(emitterIndex = 0; emitterIndex <= stringSize; emitterIndex++)
+    for(receiverIndex = 0; receiverIndex <= stringSize; receiverIndex++)
     {
         // Manual execution code
         if(executionMode == 1){
@@ -189,30 +180,27 @@ void emitterLogic(int keyValue, int executionMode)
             break;
         }
 
-        emitterIndex = stats->emitterIndex;
+        receiverIndex = stats->receiverIndex;
 
-        stringIndex = stats->stringIndex;
-        stats->stringIndex++;
-
-        if(stats->emitterIndex == (stats->spacesToRead - 1))
+        if(stats->receiverIndex == (stats->spacesToRead - 1))
         {
-            stats->emitterIndex = 0;
+            stats->receiverIndex = 0;
         }
         else
         {
-            stats->emitterIndex++;
+            stats->receiverIndex++;
         }
-        stats->valuesInMemory++;
+        stats->valuesInMemory--;
+        stats->valuesReaded++;
         sem_post(semStats);
 
-        sem_wait(semEmitters);
-        charArray[emitterIndex].index = emitterIndex;
-        charArray[emitterIndex].charValue = stringFromMemory[stringIndex] ^ key;
-        getDateTime(emitterIndex);
-
+        char ch;
+        sem_wait(semReceivers);
         cyan();
-        printf("Added %d    value in index %d   at date %s\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
-        sem_post(semReceivers);
+        ch = charArray[receiverIndex].charValue ^ key;
+        printf("Added %d    value in index %c   at date %s\n", charArray[receiverIndex].index, ch, charArray[receiverIndex].timeCreated);
+
+        sem_post(semEmitters);
 
     }
 }
@@ -255,7 +243,7 @@ int main(int argc, char *argv[])
         {
             bold_red();
             printf("-------------------------------------------------------\n");
-            printf("  Invalid execution mode for emitter (auto or manual)\n");
+            printf("  Invalid execution mode for receiver (auto or manual)\n");
             printf("-------------------------------------------------------\n");
             return 0;
         }
@@ -264,7 +252,7 @@ int main(int argc, char *argv[])
         getStatsStruct();
         setSharedItems(shareMemoryName); // Creates shared items
         stringDataFromSharedMemory(); //Gets file string from shared memory
-        emitterLogic(keyValue, executionMode);
+        receiverLogic(keyValue, executionMode);
         
         
 

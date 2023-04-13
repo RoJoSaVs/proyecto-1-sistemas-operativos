@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
         // Semaphores for critical region
         char *semEmittersName = "filled";
         sem_t *semEmitters; // For emitters control
-        semEmitters = sem_open(semEmittersName, O_CREAT, 0666, spacesToRead);
+        semEmitters = sem_open(semEmittersName, O_CREAT, 0666, 0);
 
         for(int i = 0; i < spacesToRead; i++){
             sem_post(semEmitters);

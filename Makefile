@@ -23,6 +23,13 @@ emitter:
 	./output/emitter auto 5 CE
 
 
+receiver:
+	# ./output/receiver manual 5 CE
+	clear
+	gcc code/receiver.c -o output/receiver
+	./output/receiver auto 5 CE
+
+
 receptor:
 	gcc code/Receptor.c -o output/Receptor -lpthread -lrt
 	./output/Receptor $(mode) $(key) $(Name)

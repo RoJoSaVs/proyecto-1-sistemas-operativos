@@ -41,10 +41,7 @@ reset: # Delete output files
 
 
 
-test:
-	gcc code/getData.c -o output/getData
-	./output/getData
-
-	# gcc code/test.c -o output/test
-	# ./output/test
+test: #Used just for testing xD
+	gcc code/test.c -o output/test
+	./output/test
 

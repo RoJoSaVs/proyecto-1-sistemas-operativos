@@ -76,6 +76,10 @@ int main()
         sem_post(semEmitters);
     }
 
+    // sem_close(semEmitters);
+    // sem_close(semReceivers);
+    
+
 
 
 

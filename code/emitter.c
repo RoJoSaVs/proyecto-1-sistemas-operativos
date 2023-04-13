@@ -49,7 +49,7 @@ void errorMsg(){
     reset();
 }
 
-void setSharedItems(){
+void setSharedItems(char *shareMemoryName){
     // ------------------------------------------------- //
     // ------------------ Semaphores ------------------- //
 
@@ -60,9 +60,23 @@ void setSharedItems(){
     char *semStatsName = "stats";
     semStats = sem_open(semStatsName, O_CREAT | O_RDWR, 0666, 1);
 
+    // Semaphore for array in shared memory (Receiver)
+    char *semReceiversName = "empty";
+    semReceivers = sem_open(semReceiversName, O_CREAT, 0666, 0);
+
+
+    // Semaphore for array in shared memory (Emitter)
+    char *semEmittersName = "filled";
+    semEmitters = sem_open(semEmittersName, O_CREAT | O_RDWR, 0666, stats->spacesToRead);
+
 
     // ------------------------------------------------- //
     // -------------------- Memory --------------------- //
+
+    // Array from shared memory
+    int shm_array; //file descriptor of shared memory file
+    shm_array = shm_open(shareMemoryName, O_CREAT | O_RDWR, 0666); // Shared memory for data
+    charArray = mmap(0, sizeof(struct charQueue[stats->spacesToRead]), PROT_READ | PROT_WRITE, MAP_SHARED, shm_array, 0);
 
 }
 
@@ -93,14 +107,10 @@ void stringDataFromSharedMemory()
 
 void getStatsStruct()
 {
-    sem_wait(semStats);
-
     // Stats struct shared memory
     int shm_stats;
     shm_stats = shm_open("shareStats", O_CREAT | O_RDWR, 0666); // Shared memory for stats with id "shareStats"
     stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
-
-    sem_post(semStats);
 }
 
 
@@ -134,31 +144,12 @@ void getDateTime(int index)
 
 
 // void emitterLogic(int spacesToRead, char *shareMemoryName)
-void emitterLogic(int spacesToRead, int keyValue)
+void emitterLogic(int keyValue, int executionMode)
 {
-    char *shareMemoryName = "CE";
-
-    // Semaphore for array in shared memory (Receiver)
-    char *semReceiversName = "empty";
-    semReceivers = sem_open(semReceiversName, O_CREAT, 0666, 0);
-
-
-    // Semaphore for array in shared memory (Emitter)
-    char *semEmittersName = "filled";
-    semEmitters = sem_open(semEmittersName, O_CREAT | O_RDWR, 0666, spacesToRead);
-
-
-    // Array from shared memory
-    int shm_array; //file descriptor of shared memory file
-    shm_array = shm_open(shareMemoryName, O_CREAT | O_RDWR, 0666); // Shared memory for data
-    charArray = mmap(0, sizeof(struct charQueue[spacesToRead]), PROT_READ | PROT_WRITE, MAP_SHARED, shm_array, 0);
-
     int stringSize = 0;
     int stringIndex = 0;
     int emitterIndex = 0;
-
-    // Manual execution
-
+    int spacesToRead = 0;
 
     // Initial values for the first reading
     sem_wait(semStats);
@@ -173,6 +164,20 @@ void emitterLogic(int spacesToRead, int keyValue)
     for(emitterIndex = 0; emitterIndex <= stringSize; emitterIndex++)
     {
         // Manual execution code
+        if(executionMode == 1){
+            green();
+            printf("Please press Enter: ");
+            char ch = fgetc(stdin); //read a single character
+            
+            if(ch == 0x0A)
+            {
+                printf("ENTER KEY is pressed.\n");
+            }
+        }
+        else // Auto mode delay
+        {
+            sleep(2);
+        }
 
         
         sem_wait(semStats);
@@ -185,6 +190,7 @@ void emitterLogic(int spacesToRead, int keyValue)
 
         stringIndex = stats->stringIndex;
         stats->stringIndex++;
+
         if(stats->emitterIndex == (stats->spacesToRead - 1))
         {
             stats->emitterIndex = 0;
@@ -198,11 +204,11 @@ void emitterLogic(int spacesToRead, int keyValue)
 
         sem_wait(semEmitters);
         charArray[emitterIndex].index = emitterIndex;
-        charArray[emitterIndex].charValue = stringFromMemory[stats->stringIndex] ^ key;
+        charArray[emitterIndex].charValue = stringFromMemory[stringIndex] ^ key;
         getDateTime(emitterIndex);
 
-        printf("Added %d value in index %d at date %s\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
-        // sleep(2);
+        cyan();
+        printf("Added %d    value in index %d   at date %s\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
         sem_post(semReceivers);
 
     }
@@ -222,28 +228,47 @@ int main(int argc, char *argv[])
         // =================================================================================== //
         // Shared memory code section for processing
         char *shareMemoryName; // Name given to the shared memory space 
-        char *executionMode; // Total of spaces to write and read values (char)
+        int executionMode; // Total of spaces to write and read values (char)
         char *keyValueChar; // Key value to encription (char)
         
-        shareMemoryName = argv[1];
-        executionMode = argv[2];
-        keyValueChar = argv[3];
+        // executionMode = argv[2];
+        keyValueChar = argv[2];
+        shareMemoryName = argv[3];
 
 
         int keyValue; // Key value to encription
         keyValue = atoi(keyValueChar); // Cast from char to int
 
+
+        if(strcmp(argv[1], "auto") == 0)
+        {
+            executionMode = 0;
+        }
+
+        else if(strcmp(argv[1], "manual") == 0)
+        {
+            executionMode = 1;
+        }
+        else
+        {
+            bold_red();
+            printf("-------------------------------------------------------\n");
+            printf("  Invalid execution mode for emitter (auto or manual)\n");
+            printf("-------------------------------------------------------\n");
+            return 0;
+        }
+
         
-        setSharedItems(); // Creates shared items
-        // char *stringFromMemory = stringDataFromSharedMemory(); //Gets file string from shared memory
-        stringDataFromSharedMemory(); //Gets file string from shared memory
         getStatsStruct();
-        emitterLogic(10, keyValue);
+        setSharedItems(shareMemoryName); // Creates shared items
+        stringDataFromSharedMemory(); //Gets file string from shared memory
+        emitterLogic(keyValue, executionMode);
         
         
 
 
         return 0;
     }
+    return 0;
 
 };

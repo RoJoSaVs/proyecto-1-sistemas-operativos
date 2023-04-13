@@ -45,7 +45,7 @@ void displayStats(struct controlStats *pStats) {
     reset();
 }
 
-int main(int argc, char *argv[]) {
+int finalizerLogic() {
     char *shareMemoryName;
     shareMemoryName = "CE";
 
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     munmap(sharedText, sizeof(char *));
     shm_unlink(sharedTextName);
 
-    
+
     // Release semaphores for critical region
     char *semEmittersName = "filled";
     sem_t *semEmitters; // For emitters control
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
     shm_unlink("shareStats");
 }
 
-/*
+
 int main(int argc, char* argv[])
 {
     // Open shared memory segment
@@ -191,7 +191,8 @@ int main(int argc, char* argv[])
                     break;
                 case SDL_CONTROLLERBUTTONUP:
                     SDL_Log("Button %d up", event.cbutton.button);
-                    displayStats(stats);
+                    finalizerLogic();
+                    quit = 1;
                     break;
             }
         }
@@ -202,5 +203,5 @@ int main(int argc, char* argv[])
     SDL_Quit();
     return 0;
 }
-*/
+
 

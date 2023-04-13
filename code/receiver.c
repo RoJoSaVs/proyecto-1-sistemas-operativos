@@ -206,6 +206,7 @@ void receiverLogic(int keyValue, int executionMode)
         stats->lastProcessInStats = pid;
         printf(" Process %d\n", stats->lastProcessInStats);
         if(stats->lastProcessInStats == stats->processToKill){
+            stats->killDone = 1;
             exit(0);
         }
 

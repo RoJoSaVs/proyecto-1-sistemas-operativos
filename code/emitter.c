@@ -183,6 +183,7 @@ void emitterLogic(int keyValue, int executionMode)
 
 
         sem_wait(semStats);
+
         if(stats->stringIndex == stats->inputTextSize)
         {
             sem_post(semStats);
@@ -203,6 +204,8 @@ void emitterLogic(int keyValue, int executionMode)
             stats->emitterIndex++;
         }
         stats->valuesInMemory++;
+
+
         sem_post(semStats);
 
         sem_wait(semEmitters);
@@ -214,12 +217,14 @@ void emitterLogic(int keyValue, int executionMode)
         printf("Added %d    value in index %d   at date %s\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
         sem_post(semReceivers);
 
-        __pid_t pid = getpid();
-        stats->lastProcessInStats = pid;
+        stats->lastProcessInStats = getpid();
         printf(" Process %d\n", stats->lastProcessInStats);
-        if(stats->lastProcessInStats == stats->processToKill){
+        if(getpid() == stats->processToKill){
+            stats->killDone = 1;
             exit(0);
         }
+
+
     }
 }
 

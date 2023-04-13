@@ -23,7 +23,8 @@ struct controlStats *stats;
 
 void terminate(struct controlStats *pStats, int pid){
     pStats->processToKill = pid;
-    printf(" Process to terminate %d\n", pStats->processToKill);
+    printf("|%-50s|%-10d|\n", "matar", pid);
+
 }
 
 // Access memory data
@@ -50,9 +51,6 @@ int main(int argc, char *argv[]) {
     stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
 
 
-    // Access memory data
-    displayStats(stats);
-
     // Find and terminate emitters
     char command[256];
     sprintf(command, "pgrep emitter");
@@ -66,7 +64,15 @@ int main(int argc, char *argv[]) {
     char pid_str[256];
     while (fgets(pid_str, 256, fp) != NULL) {
         int pid = atoi(pid_str);
-        terminate(stats, pid);
+        //sprintf(command, "pgrep emitter");
+        printf(" Process to terminate test %d\n", pid);
+        //system("ps -e");
+        while(stats->killDone==0){
+
+            terminate(stats, pid);
+            printf("matando emisores/n");
+        }
+        stats->killDone=0;
    }
 
     pclose(fp);
@@ -82,18 +88,27 @@ int main(int argc, char *argv[]) {
     }
 
     char pid_str2[256];
-    while (fgets(pid_str2, 256, fp2) != NULL) {
+    while (fgets(pid_str2, 256, fp) != NULL) {
         int pid2 = atoi(pid_str2);
-        terminate(stats, pid2);
-    }
+        //sprintf(command, "pgrep emitter");
+        printf(" Process to terminate test %d\n", pid2);
+        //system("ps -e");
+        while (stats->killDone == 0) {
 
+            terminate(stats, pid2);
+            printf("matando receptored/n");
+        }
+        stats->killDone = 0;
+    }
+    printf("se m,urio todo");
     pclose(fp2);
 
-/*
+    // Access memory data
+    displayStats(stats);
+
+
     // Release the resources used by the shared memory segment and unmap it from the process address space
-    close(shm_id);
     munmap(stats, sizeof(struct controlStats));
-*/
 }
 
 /*

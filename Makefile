@@ -39,5 +39,6 @@ test: # Run the initializer
 	./output/initializer CE 15 4
 
 test_finalizer: # Run the initializer
+	gcc code/finalizer.c -o output/finalizer -I /home/user/libs/include/SDL2 -L /home/user/libs/lib -lSDL2 -Wl,-rpath=/home/user/libs/lib
 	./output/finalizer
 

@@ -27,5 +27,6 @@ typedef struct controlStats
 
     int processToKill;
     int lastProcessInStats;
+    int killDone;
 
 } controlStats;

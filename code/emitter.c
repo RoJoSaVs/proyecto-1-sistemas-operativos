@@ -183,7 +183,7 @@ void emitterLogic(int keyValue, int executionMode)
 
         
         sem_wait(semStats);
-        if(stats->stringIndex == stats->inputTextSize)
+        if((stats->stringIndex == stats->inputTextSize) || stats->killingProcess == getpid())
         {
             sem_post(semStats);
             break;
@@ -203,6 +203,7 @@ void emitterLogic(int keyValue, int executionMode)
             stats->emitterIndex++;
         }
         stats->valuesInMemory++;
+        stats->lastProcess = getpid();
         sem_post(semStats);
 
         sem_wait(semEmitters);

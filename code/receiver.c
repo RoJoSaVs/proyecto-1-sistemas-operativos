@@ -174,7 +174,7 @@ void receiverLogic(int keyValue, int executionMode)
 
         
         sem_wait(semStats);
-        if(stats->stringIndex == stats->inputTextSize)
+        if((stats->stringIndex == stats->inputTextSize) || stats->killingProcess == getpid())
         {
             sem_post(semStats);
             break;
@@ -192,6 +192,7 @@ void receiverLogic(int keyValue, int executionMode)
         }
         stats->valuesInMemory--;
         stats->valuesReaded++;
+        stats->lastProcess = getpid();
         sem_post(semStats);
 
         char ch;

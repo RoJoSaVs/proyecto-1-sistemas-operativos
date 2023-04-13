@@ -1,0 +1,8 @@
+./output/initializer CE 10 5
+
+
+# ./output/emitter manual 5 CE
+./output/emitter auto 5 CE
+
+# ./output/receiver manual 5 CE
+./output/receiver auto 5 C

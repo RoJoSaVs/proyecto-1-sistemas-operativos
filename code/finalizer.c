@@ -68,7 +68,7 @@ int finalizerLogic() {
     while (fgets(pid_str, 256, fp) != NULL) {
         int pid = atoi(pid_str);
 
-        printf("|%-50s|%-10d|\n", "Matando proceso ", pid);
+        printf("|%-50s|%-10d|\n", "Matando proceso emisor", pid);
         while(stats->killDone==0){
 
             terminate(stats, pid);
@@ -91,14 +91,13 @@ int finalizerLogic() {
     char pid_str2[256];
     while (fgets(pid_str2, 256, fp) != NULL) {
         int pid2 = atoi(pid_str2);
-        printf("|%-50s|%-10d|\n", "Matando proceso ", pid2);
+        printf("|%-50s|%-10d|\n", "Matando proceso receptor", pid2);
         while (stats->killDone == 0) {
 
             terminate(stats, pid2);
         }
         stats->killDone = 0;
     }
-    printf("se murio todo");
     pclose(fp2);
 
     // Access memory data

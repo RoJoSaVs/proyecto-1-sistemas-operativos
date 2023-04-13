@@ -221,6 +221,7 @@ void emitterLogic(int keyValue, int executionMode)
         printf(" Process %d\n", stats->lastProcessInStats);
         if(getpid() == stats->processToKill){
             stats->killDone = 1;
+            stats->emittersAlive--;
             exit(0);
         }
 
@@ -245,7 +246,7 @@ int main(int argc, char *argv[])
         char *shareMemoryName; // Name given to the shared memory space 
         int executionMode; // Total of spaces to write and read values (char)
         char *keyValueChar; // Key value to encription (char)
-        
+
         keyValueChar = argv[2];
         shareMemoryName = argv[3];
 

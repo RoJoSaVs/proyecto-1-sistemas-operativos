@@ -26,11 +26,6 @@ receiver:
 	./output/receiver auto 5 CE
 
 
-receptor:
-	gcc code/Receptor.c -o output/Receptor -lpthread -lrt
-	./output/Receptor $(mode) $(key) $(Name)
-
-
 reset: # Delete output files
 	rm ./output/*
 	clear
@@ -38,7 +33,7 @@ reset: # Delete output files
 test: # Run the initializer
 	./output/initializer CE 15 4
 
-test_finalizer: # Run the initializer
+_finalizer: # Run the initializer
 	gcc code/finalizer.c -o output/finalizer -I /home/user/libs/include/SDL2 -L /home/user/libs/lib -lSDL2 -Wl,-rpath=/home/user/libs/lib
-	./output/finalizer
+	./output/finalizer CE
 

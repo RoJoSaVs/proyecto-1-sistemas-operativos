@@ -207,6 +207,7 @@ void receiverLogic(int keyValue, int executionMode)
         printf(" Process %d\n", stats->lastProcessInStats);
         if(stats->lastProcessInStats == stats->processToKill){
             stats->killDone = 1;
+            stats->receiversAlive--;
             exit(0);
         }
 

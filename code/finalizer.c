@@ -20,10 +20,11 @@
 #include <signal.h>
 
 struct controlStats *stats;
+struct charQueue *charArray; // Map the shared memory segment in process address space
 
 void terminate(struct controlStats *pStats, int pid){
     pStats->processToKill = pid;
-    printf("|%-50s|%-10d|\n", "matar", pid);
+
 
 }
 
@@ -45,6 +46,8 @@ void displayStats(struct controlStats *pStats) {
 }
 
 int main(int argc, char *argv[]) {
+    char *shareMemoryName;
+    shareMemoryName = "CE";
 
     int shm_stats;
     shm_stats = shm_open("shareStats", O_CREAT | O_RDWR, 0666); // Shared memory for stats with id "shareStats"
@@ -64,13 +67,11 @@ int main(int argc, char *argv[]) {
     char pid_str[256];
     while (fgets(pid_str, 256, fp) != NULL) {
         int pid = atoi(pid_str);
-        //sprintf(command, "pgrep emitter");
-        printf(" Process to terminate test %d\n", pid);
-        //system("ps -e");
+
+        printf("|%-50s|%-10d|\n", "Matando proceso ", pid);
         while(stats->killDone==0){
 
             terminate(stats, pid);
-            printf("matando emisores/n");
         }
         stats->killDone=0;
    }
@@ -90,25 +91,63 @@ int main(int argc, char *argv[]) {
     char pid_str2[256];
     while (fgets(pid_str2, 256, fp) != NULL) {
         int pid2 = atoi(pid_str2);
-        //sprintf(command, "pgrep emitter");
-        printf(" Process to terminate test %d\n", pid2);
-        //system("ps -e");
+        printf("|%-50s|%-10d|\n", "Matando proceso ", pid2);
         while (stats->killDone == 0) {
 
             terminate(stats, pid2);
-            printf("matando receptored/n");
         }
         stats->killDone = 0;
     }
-    printf("se m,urio todo");
+    printf("se murio todo");
     pclose(fp2);
 
     // Access memory data
     displayStats(stats);
 
 
+    //Release the shared info from the .txt
+    int shm_text; //file descriptor of shared memory file
+    void *sharedText;
+    char *sharedTextName = "textMemory";
+    shm_text = shm_open(sharedTextName, O_CREAT | O_RDWR, 0666); // Shared memory for data
+    sharedText = mmap(0, sizeof(char *), PROT_READ | PROT_WRITE, MAP_SHARED, shm_text, 0);
+    munmap(sharedText, sizeof(char *));
+    shm_unlink(sharedTextName);
+
+    
+    // Release semaphores for critical region
+    char *semEmittersName = "filled";
+    sem_t *semEmitters; // For emitters control
+    semEmitters = sem_open(semEmittersName, O_CREAT, 0666, 0);
+    sem_close(semEmitters);
+    sem_unlink(semEmittersName);
+
+
+    char *semReceiversName = "empty";
+    sem_t *semReceivers; // For receivers control
+    semReceivers = sem_open(semReceiversName, O_CREAT, 0666, 0);
+    sem_close(semReceivers);
+    sem_unlink(semReceiversName);
+
+    char *semStatsName = "stats";
+    sem_t *semStats; // Control to stats
+    semStats = sem_open(semStatsName, O_CREAT, 0666, 1);
+    sem_close(semStats);
+    sem_unlink(semStatsName);
+
+    // Release shared memory for array
+    int shm_array; //file descriptor of shared memory file
+
+    shm_array = shm_open(shareMemoryName, O_CREAT | O_RDWR, 0666); // Shared memory for data
+
+    charArray = mmap(0, stats->spacesToRead, PROT_READ | PROT_WRITE, MAP_SHARED, shm_array, 0);
+    munmap(charArray, sizeof(char *));
+
+    shm_unlink(shareMemoryName);
+
     // Release the resources used by the shared memory segment and unmap it from the process address space
     munmap(stats, sizeof(struct controlStats));
+    shm_unlink("shareStats");
 }
 
 /*

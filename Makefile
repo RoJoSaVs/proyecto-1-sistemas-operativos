@@ -41,6 +41,8 @@ receptor:
 
 
 reset: # Delete output files
+	gcc code/test.c -o output/test
+	./output/test
 	rm ./output/*
 	clear
 

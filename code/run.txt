@@ -5,4 +5,4 @@
 ./output/emitter auto 5 CE
 
 # ./output/receiver manual 5 CE
-./output/receiver auto 5 C
+./output/receiver auto 5 CE

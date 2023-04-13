@@ -92,23 +92,6 @@ int main()
     sem_close(semReceivers);
 
     printf("Reset succesfull\n");
-
-    // int a = 100000;
-    // int b = 100;
-    // int c = 10;
-    // char *d = "1000000000";
-    // yellow();
-    // printf("+-----------------------------------------------------------------------------+\n");
-    // bold_green();
-    // printf("|     Index insertion     |     Value inserted     |    Date time inserted    |\n");
-    // yellow();
-    // printf("+-----------------------------------------------------------------------------+\n");
-    // cyan();
-    // printf("|\t %-10d \t  |  \t %-10d \t   |  %20s    |\n", a, b, d);
-    // yellow();
-    // printf("+-----------------------------------------------------------------------------+\n");
-    // reset();
-
     return 0;
 
 

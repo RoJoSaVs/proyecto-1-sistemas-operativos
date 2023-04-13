@@ -50,8 +50,6 @@ struct controlStats defaultValues(int keyValue, int spacesToRead, int inputTextS
     initialControlStats.stringIndex = 0;
     initialControlStats.emitterIndex = 0;
     initialControlStats.receiverIndex = 0;
-    initialControlStats.lastProcess = 0;
-    initialControlStats.killingProcess = 0;
 
     return initialControlStats;
 }

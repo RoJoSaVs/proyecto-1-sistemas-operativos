@@ -17,17 +17,22 @@ initializer:
 	
 
 emitter:
-	# ./output/emitter manual 5 CE
 	clear
 	gcc code/emitter.c -o output/emitter
-	./output/emitter auto 5 CE
+	./output/emitter manual 5 CE
+	# ./output/emitter auto 5 CE
 
 
 receiver:
-	# ./output/receiver manual 5 CE
 	clear
 	gcc code/receiver.c -o output/receiver
-	./output/receiver auto 5 CE
+	./output/receiver manual 5 CE
+	# ./output/receiver auto 5 CE
+
+
+finalizer:
+	gcc code/finalizer.c -o output/finalizer
+	./output/finalizer
 
 
 receptor:

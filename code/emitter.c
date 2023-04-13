@@ -170,7 +170,7 @@ void emitterLogic(int keyValue, int executionMode)
             green();
             printf("Please press Enter: ");
             char ch = fgetc(stdin); //read a single character
-            
+
             if(ch == 0x0A)
             {
                 printf("ENTER KEY is pressed.\n");
@@ -181,7 +181,7 @@ void emitterLogic(int keyValue, int executionMode)
             sleep(2);
         }
 
-        
+
         sem_wait(semStats);
         if(stats->stringIndex == stats->inputTextSize)
         {
@@ -214,6 +214,12 @@ void emitterLogic(int keyValue, int executionMode)
         printf("Added %d    value in index %d   at date %s\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
         sem_post(semReceivers);
 
+        __pid_t pid = getpid();
+        stats->lastProcessInStats = pid;
+        printf(" Process %d\n", stats->lastProcessInStats);
+        if(stats->lastProcessInStats == stats->processToKill){
+            exit(0);
+        }
     }
 }
 
@@ -221,6 +227,7 @@ void emitterLogic(int keyValue, int executionMode)
 
 int main(int argc, char *argv[])
 {
+
     if(argc != 4)
     {
         errorMsg();
@@ -265,8 +272,6 @@ int main(int argc, char *argv[])
         setSharedItems(shareMemoryName); // Creates shared items
         stringDataFromSharedMemory(); //Gets file string from shared memory
         emitterLogic(keyValue, executionMode);
-        
-        
 
 
         return 0;

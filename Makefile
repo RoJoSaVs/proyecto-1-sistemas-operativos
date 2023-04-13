@@ -4,8 +4,6 @@ build: # Compile all files needed to run the project
 	gcc code/initializer.c -o output/initializer -lpthread -lrt
 	gcc code/emitter.c -o output/emitter -lpthread -lrt
 	gcc code/finalizer.c -o output/finalizer -I /home/user/libs/include/SDL2 -L /home/user/libs/lib -lSDL2 -Wl,-rpath=/home/user/libs/lib
-	./output/initializer CE 10 5
-	./output/emitter CE auto 5
 
 
 initializer:
@@ -42,8 +40,4 @@ test: # Run the initializer
 
 test_finalizer: # Run the initializer
 	./output/finalizer
-
-test:
-	gcc code/getData.c -o output/getData
-	./output/getData
 

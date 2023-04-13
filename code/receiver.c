@@ -112,8 +112,8 @@ void getStatsStruct()
     shm_stats = shm_open("shareStats", O_CREAT | O_RDWR, 0666); // Shared memory for stats with id "shareStats"
     stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
 
-    stats->emittersAlive++;
-    stats->totalEmitters++;
+    stats->receiversAlive++;
+    stats->totalReceivers++;
 }
 
 
@@ -201,6 +201,13 @@ void receiverLogic(int keyValue, int executionMode)
         printf("Added %d    value in index %c   at date %s\n", charArray[receiverIndex].index, ch, charArray[receiverIndex].timeCreated);
 
         sem_post(semEmitters);
+
+        __pid_t pid = getpid();
+        stats->lastProcessInStats = pid;
+        printf(" Process %d\n", stats->lastProcessInStats);
+        if(stats->lastProcessInStats == stats->processToKill){
+            exit(0);
+        }
 
     }
 }

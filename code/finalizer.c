@@ -17,19 +17,27 @@
 #include "infoStruct.c"
 
 #include <SDL.h>
+#include <signal.h>
+
+struct controlStats *stats;
+
+void terminate(struct controlStats *pStats, int pid){
+    pStats->processToKill = pid;
+    printf(" Process to terminate %d\n", pStats->processToKill);
+}
 
 // Access memory data
 void displayStats(struct controlStats *pStats) {
     yellow();
     printf("---------------------------------------------------------------\n");
     bold_green();
-    printf(" Memory used %ld\n", pStats->memoryUsed);
-    printf(" Emitters Alive %d\n", pStats->emittersAlive);
-    printf(" Receivers Alive %d\n", pStats->receiversAlive);
-    printf(" Total Emmiters %d\n", pStats->totalEmitters);
-    printf(" Total Receivers %d\n", pStats->totalReceivers);
-    printf(" Amount of characters in shared memory %d\n", pStats->inputTextSize);
-    printf(" Values in memory %d\n", pStats->valuesInMemory);
+    printf("|%-50s|%-10lu|\n", "Memory used", pStats->memoryUsed);
+    printf("|%-50s|%-10d|\n", "Emitters Alive", pStats->emittersAlive);
+    printf("|%-50s|%-10d|\n", "Receivers Alive", pStats->receiversAlive);
+    printf("|%-50s|%-10d|\n", "Total Emmiters", pStats->totalEmitters);
+    printf("|%-50s|%-10d|\n", "Total Receivers", pStats->totalReceivers);
+    printf("|%-50s|%-10d|\n", "Amount of characters in shared memory", pStats->inputTextSize);
+    printf("|%-50s|%-10d|\n", "Values in memory", pStats->valuesInMemory);
     yellow();
     printf("---------------------------------------------------------------\n");
     reset();
@@ -37,22 +45,55 @@ void displayStats(struct controlStats *pStats) {
 
 int main(int argc, char *argv[]) {
 
-    // Open shared memory segment
-    int shm_id = shm_open("shareStats", O_RDONLY, 0666);
+    int shm_stats;
+    shm_stats = shm_open("shareStats", O_CREAT | O_RDWR, 0666); // Shared memory for stats with id "shareStats"
+    stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
 
-    // Map shared memory into the process
-    struct controlStats *stats = mmap(NULL, sizeof(struct controlStats), PROT_READ, MAP_SHARED, shm_id, 0);
 
     // Access memory data
     displayStats(stats);
 
+    // Find and terminate emitters
+    char command[256];
+    sprintf(command, "pgrep emitter");
+
+    FILE *fp = popen(command, "r");
+    if (fp == NULL) {
+        perror("popen() failed");
+        exit(1);
+    }
+
+    char pid_str[256];
+    while (fgets(pid_str, 256, fp) != NULL) {
+        int pid = atoi(pid_str);
+        terminate(stats, pid);
+   }
+
+    pclose(fp);
+
+    // Find and terminate receivers
+    char command2[256];
+    sprintf(command2, "pgrep receiver");
+
+    FILE *fp2 = popen(command2, "r");
+    if (fp2 == NULL) {
+        perror("popen() failed");
+        exit(1);
+    }
+
+    char pid_str2[256];
+    while (fgets(pid_str2, 256, fp2) != NULL) {
+        int pid2 = atoi(pid_str2);
+        terminate(stats, pid2);
+    }
+
+    pclose(fp2);
+
+/*
     // Release the resources used by the shared memory segment and unmap it from the process address space
     close(shm_id);
     munmap(stats, sizeof(struct controlStats));
-
-    // Access memory data
-    displayStats(stats);
-
+*/
 }
 
 /*

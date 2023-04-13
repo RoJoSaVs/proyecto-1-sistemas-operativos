@@ -50,6 +50,10 @@ struct controlStats defaultValues(int keyValue, int spacesToRead, int inputTextS
     initialControlStats.stringIndex = 0;
     initialControlStats.emitterIndex = 0;
     initialControlStats.receiverIndex = 0;
+    initialControlStats.processToKill = 0;
+    initialControlStats.lastProcessInStats = 0;
+    initialControlStats.killDone = 0;
+
 
     return initialControlStats;
 }
@@ -126,12 +130,14 @@ int main(int argc, char *argv[])
         shareMemoryName = argv[1];
         spacesToReadChar = argv[2];
         keyValueChar = argv[3];
-        
+
+
         int spacesToRead; // Total of spaces to write and read values
         int keyValue; // Key value to encription
 
         spacesToRead = atoi(spacesToReadChar);
         keyValue = atoi(keyValueChar);
+
 
 
         // =================================================================================== //
@@ -141,7 +147,7 @@ int main(int argc, char *argv[])
         shm_array = shm_open(shareMemoryName, O_CREAT | O_RDWR, 0666); // Shared memory for data
 
         ftruncate(shm_array, sizeof(struct charQueue[spacesToRead])); // Configure the size of the shared memory block
-        
+
         struct charQueue *charArray; // Map the shared memory segment in process address space
         charArray = mmap(0, sizeof(struct charQueue[spacesToRead]), PROT_READ | PROT_WRITE, MAP_SHARED, shm_array, 0);
 
@@ -162,7 +168,11 @@ int main(int argc, char *argv[])
         // Semaphores for critical region
         char *semEmittersName = "filled";
         sem_t *semEmitters; // For emitters control
-        semEmitters = sem_open(semEmittersName, O_CREAT, 0666, spacesToRead);
+        semEmitters = sem_open(semEmittersName, O_CREAT, 0666, 0);
+
+        for(int i = 0; i < spacesToRead; i++){
+            sem_post(semEmitters);
+        }
 
         char *semReceiversName = "empty";
         sem_t *semReceivers; // For receivers control

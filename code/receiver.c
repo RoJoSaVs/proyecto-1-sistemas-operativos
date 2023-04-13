@@ -112,8 +112,8 @@ void getStatsStruct()
     shm_stats = shm_open("shareStats", O_CREAT | O_RDWR, 0666); // Shared memory for stats with id "shareStats"
     stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
 
-    stats->emittersAlive++;
-    stats->totalEmitters++;
+    stats->receiversAlive++;
+    stats->totalReceivers++;
 }
 
 
@@ -138,26 +138,17 @@ int getDecimal(int clave)
     return dec_value;
 }
 
-void getDateTime(int index)
-{
-    time_t now = time(NULL);
-    struct tm *t = localtime(&now);
-    strftime(charArray[index].timeCreated, sizeof(charArray[index].timeCreated)-1, "%d %m %Y %X", t);
-}
 
-
-void emitterLogic(int keyValue, int executionMode)
+void receiverLogic(int keyValue, int executionMode)
 {
     int stringSize = 0;
-    int stringIndex = 0;
-    int emitterIndex = 0;
+    int receiverIndex = 0;
     int spacesToRead = 0;
 
     // Initial values for the first reading
     sem_wait(semStats);
     stringSize = stats->inputTextSize;
-    stringIndex = stats->stringIndex;
-    emitterIndex = stats->emitterIndex;
+    receiverIndex = stats->emitterIndex;
     spacesToRead = stats->spacesToRead;
     sem_post(semStats);
 
@@ -167,7 +158,6 @@ void emitterLogic(int keyValue, int executionMode)
         green();
         printf("Please press Enter for each loop\n");
     }
-    
 
     yellow();
     printf("+-----------------------------------------------------------------------------+\n");
@@ -176,15 +166,15 @@ void emitterLogic(int keyValue, int executionMode)
     yellow();
     printf("+-----------------------------------------------------------------------------+\n");
 
-    for(emitterIndex = 0; emitterIndex <= stringSize; emitterIndex++)
+    for(receiverIndex = 0; receiverIndex <= stringSize; receiverIndex++)
     {
         // Manual execution code
         if(executionMode == 1){
-            green();
             char ch = fgetc(stdin); //read a single character
-
+            
             if(ch == 0x0A)
             {
+                // printf("ENTER KEY is pressed.\n");
             }
         }
         else // Auto mode delay
@@ -192,52 +182,48 @@ void emitterLogic(int keyValue, int executionMode)
             sleep(2);
         }
 
-
+        
         sem_wait(semStats);
-
         if(stats->stringIndex == stats->inputTextSize)
         {
             sem_post(semStats);
             break;
         }
 
-        emitterIndex = stats->emitterIndex;
+        receiverIndex = stats->receiverIndex;
 
-        stringIndex = stats->stringIndex;
-        stats->stringIndex++;
-
-        if(stats->emitterIndex == (stats->spacesToRead - 1))
+        if(stats->receiverIndex == (stats->spacesToRead - 1))
         {
-            stats->emitterIndex = 0;
+            stats->receiverIndex = 0;
         }
         else
         {
-            stats->emitterIndex++;
+            stats->receiverIndex++;
         }
-        stats->valuesInMemory++;
-
-
+        stats->valuesInMemory--;
+        stats->valuesReaded++;
         sem_post(semStats);
 
-        sem_wait(semEmitters);
-        charArray[emitterIndex].index = emitterIndex;
-        charArray[emitterIndex].charValue = stringFromMemory[stringIndex] ^ key;
-        getDateTime(emitterIndex);
+        char ch;
+        sem_wait(semReceivers);
+        cyan();
+        ch = charArray[receiverIndex].charValue ^ key;
 
         yellow();
         printf("+-----------------------------------------------------------------------------+\n");
         cyan();
-        printf("|\t %-10d \t  |  \t %-10c \t   |  %20s    |\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
-        sem_post(semReceivers);
+        printf("|\t %-10d \t  |  \t %-10c \t   |  %20s    |\n", charArray[receiverIndex].index, ch, charArray[receiverIndex].timeCreated);
 
-        stats->lastProcessInStats = getpid();
+        sem_post(semEmitters);
+
+        __pid_t pid = getpid();
+        stats->lastProcessInStats = pid;
         printf(" Process %d\n", stats->lastProcessInStats);
-        if(getpid() == stats->processToKill){
+        if(stats->lastProcessInStats == stats->processToKill){
             stats->killDone = 1;
-            stats->emittersAlive--;
+            stats->receiversAlive--;
             exit(0);
         }
-
 
     }
 }
@@ -246,7 +232,6 @@ void emitterLogic(int keyValue, int executionMode)
 
 int main(int argc, char *argv[])
 {
-
     if(argc != 4)
     {
         errorMsg();
@@ -259,7 +244,7 @@ int main(int argc, char *argv[])
         char *shareMemoryName; // Name given to the shared memory space 
         int executionMode; // Total of spaces to write and read values (char)
         char *keyValueChar; // Key value to encription (char)
-
+        
         keyValueChar = argv[2];
         shareMemoryName = argv[3];
 
@@ -281,7 +266,7 @@ int main(int argc, char *argv[])
         {
             bold_red();
             printf("-------------------------------------------------------\n");
-            printf("  Invalid execution mode for emitter (auto or manual)\n");
+            printf("  Invalid execution mode for receiver (auto or manual)\n");
             printf("-------------------------------------------------------\n");
             return 0;
         }
@@ -290,7 +275,9 @@ int main(int argc, char *argv[])
         getStatsStruct();
         setSharedItems(shareMemoryName); // Creates shared items
         stringDataFromSharedMemory(); //Gets file string from shared memory
-        emitterLogic(keyValue, executionMode);
+        receiverLogic(keyValue, executionMode);
+        
+        
 
 
         return 0;

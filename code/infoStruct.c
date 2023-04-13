@@ -24,4 +24,9 @@ typedef struct controlStats
     int stringIndex; // Control the current value readed of the string loaded from the file
     int emitterIndex; // Place where emitters are writing
     int receiverIndex; // Place where receivers are reading
+
+    int processToKill;
+    int lastProcessInStats;
+    int killDone;
+
 } controlStats;

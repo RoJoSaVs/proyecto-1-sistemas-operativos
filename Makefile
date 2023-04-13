@@ -3,11 +3,8 @@ all: build
 build: # Compile all files needed to run the project
 	gcc code/initializer.c -o output/initializer -lpthread -lrt
 	gcc code/emitter.c -o output/emitter -lpthread -lrt
-	gcc code/test.c -o output/test -lpthread -lrt
-	
-	./output/initializer CE 10 5
-	./output/test
-	./output/emitter CE auto 5
+	gcc code/finalizer.c -o output/finalizer -I /home/user/libs/include/SDL2 -L /home/user/libs/lib -lSDL2 -Wl,-rpath=/home/user/libs/lib
+
 
 
 initializer:
@@ -18,25 +15,28 @@ initializer:
 
 emitter:
 	clear
-	gcc code/emitter.c -o output/emitter -lpthread -lrt
-	./output/emitter CE auto 5
+	gcc code/emitter.c -o output/emitter
+	./output/emitter manual 5 CE
+	# ./output/emitter auto 5 CE
 
 
-receptor:
-	gcc code/Receptor.c -o output/Receptor -lpthread -lrt
-	./output/Receptor $(mode) $(key) $(Name)
+receiver:
+	clear
+	gcc code/receiver.c -o output/receiver
+	./output/receiver manual 5 CE
+	# ./output/receiver auto 5 CE
 
 
 reset: # Delete output files
+	gcc code/test.c -o output/test
+	./output/test
 	rm ./output/*
 	clear
 
+test: # Run the initializer
+	./output/initializer CE 15 4
 
-
-test:
-	gcc code/getData.c -o output/getData -lpthread -lrt
-	./output/getData
-
-	# gcc code/test.c -o output/test
-	# ./output/test
+_finalizer: # Run the initializer
+	gcc code/finalizer.c -o output/finalizer -I /home/user/libs/include/SDL2 -L /home/user/libs/lib -lSDL2 -Wl,-rpath=/home/user/libs/lib
+	./output/finalizer CE
 

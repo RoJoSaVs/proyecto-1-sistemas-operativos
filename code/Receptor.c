@@ -134,6 +134,9 @@ void read_info (int key, char* shareMemoryName, char* mode){
     printf("results2: %d",num4);
     //printf("llave: %d" ,key+4);
     printf("\n");
+
+
+    stats->lastProcessInStats = getpid();
 }
 
 //main

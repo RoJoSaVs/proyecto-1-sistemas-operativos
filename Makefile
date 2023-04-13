@@ -18,7 +18,7 @@ initializer:
 
 emitter:
 	clear
-	gcc code/emitter.c -o output/emiter
+	gcc code/emitter.c -o output/emitter
 	./output/emitter CE auto 5
 
 
@@ -36,3 +36,7 @@ reset: # Delete output files
 test:
 	gcc code/getData.c -o output/getData
 	./output/getData
+
+	# gcc code/test.c -o output/test
+	# ./output/test
+

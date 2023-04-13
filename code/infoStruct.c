@@ -2,7 +2,7 @@ typedef struct charQueue
 {
     // pid_t processId;
     int index;
-    // char timeCreated[100];
+    char timeCreated[100];
     unsigned charValue;
 } charQueue;
 

@@ -18,6 +18,11 @@
 
 // Constant values for the whole code Semaphores and Shared Memory pointer
 // -----------------------------------------------------------------------//
+
+// Control for string loaded from file
+sem_t *semSharedText;
+
+
 // Control for stats
 sem_t *semStats;
 struct controlStats *stats;
@@ -44,16 +49,27 @@ void errorMsg(){
     reset();
 }
 
+void setSharedItems(){
+    // ------------------------------------------------- //
+    // ------------------ Semaphores ------------------- //
+
+    // Semaphore for file string access
+    semSharedText = sem_open("textFromFile", O_CREAT | O_RDWR, 0666, 1);
+
+    // Semaphore for stats struct access
+    char *semStatsName = "stats";
+    semStats = sem_open(semStatsName, O_CREAT | O_RDWR, 0666, 1);
+
+
+    // ------------------------------------------------- //
+    // -------------------- Memory --------------------- //
+
+}
 
 void stringDataFromSharedMemory()
 {
     // Semaphore for file string access
-    sem_t *semSharedText;
-    semSharedText = sem_open("textFromFile", O_CREAT | O_RDWR, 0666, 1);
-
     sem_wait(semSharedText);
-    // sleep(10);
-
 
     int shm_text; //file descriptor of shared memory file
     void *sharedText;
@@ -73,28 +89,16 @@ void stringDataFromSharedMemory()
     stringFromMemory = (char *) sharedText;
     
     sem_post(semSharedText);
-
-    // return stringFromMemory;
 }
 
 void getStatsStruct()
 {
-    // Semaphore for stats struct access
-    char *semStatsName = "stats";
-    semStats = sem_open(semStatsName, O_CREAT | O_RDWR, 0666, 1);
-    
     sem_wait(semStats);
-    // sleep(10);
 
     // Stats struct shared memory
     int shm_stats;
     shm_stats = shm_open("shareStats", O_CREAT | O_RDWR, 0666); // Shared memory for stats with id "shareStats"
     stats = mmap(0, sizeof(struct controlStats), PROT_READ | PROT_WRITE, MAP_SHARED, shm_stats, 0);
-
-
-    // stats->totalEmitters = 0;
-    // stats->emittersAlive = 0;
-    // printf("Total emiters %d \n", stats->totalEmitters);
 
     sem_post(semStats);
 }
@@ -120,6 +124,14 @@ int getDecimal(int clave)
  
     return dec_value;
 }
+
+void getDateTime(int index)
+{
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    strftime(charArray[index].timeCreated, sizeof(charArray[index].timeCreated)-1, "%d %m %Y %X", t);
+}
+
 
 // void emitterLogic(int spacesToRead, char *shareMemoryName)
 void emitterLogic(int spacesToRead, int keyValue)
@@ -170,6 +182,9 @@ void emitterLogic(int spacesToRead, int keyValue)
         }
 
         emitterIndex = stats->emitterIndex;
+
+        stringIndex = stats->stringIndex;
+        stats->stringIndex++;
         if(stats->emitterIndex == (stats->spacesToRead - 1))
         {
             stats->emitterIndex = 0;
@@ -183,11 +198,11 @@ void emitterLogic(int spacesToRead, int keyValue)
 
         sem_wait(semEmitters);
         charArray[emitterIndex].index = emitterIndex;
-        charArray[emitterIndex].charValue = stringFromMemory[emitterIndex] ^ key;
-        // charArray[emitterIndex].timeCreated = string;
+        charArray[emitterIndex].charValue = stringFromMemory[stats->stringIndex] ^ key;
+        getDateTime(emitterIndex);
 
-        printf("Added %d value in index %d at date \n", charArray[emitterIndex].index, charArray[emitterIndex].charValue);
-        sleep(5);
+        printf("Added %d value in index %d at date %s\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
+        // sleep(2);
         sem_post(semReceivers);
 
     }
@@ -218,8 +233,8 @@ int main(int argc, char *argv[])
         int keyValue; // Key value to encription
         keyValue = atoi(keyValueChar); // Cast from char to int
 
-        // Shared memory access
-
+        
+        setSharedItems(); // Creates shared items
         // char *stringFromMemory = stringDataFromSharedMemory(); //Gets file string from shared memory
         stringDataFromSharedMemory(); //Gets file string from shared memory
         getStatsStruct();

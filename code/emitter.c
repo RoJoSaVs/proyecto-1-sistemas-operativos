@@ -163,17 +163,28 @@ void emitterLogic(int keyValue, int executionMode)
 
     int key = getDecimal(keyValue);
 
+    if(executionMode == 1){
+        green();
+        printf("Please press Enter for each loop\n");
+    }
+    
+
+    yellow();
+    printf("+-----------------------------------------------------------------------------+\n");
+    bold_green();
+    printf("|     Index insertion     |     Value inserted     |    Date time inserted    |\n");
+    yellow();
+    printf("+-----------------------------------------------------------------------------+\n");
+
     for(emitterIndex = 0; emitterIndex <= stringSize; emitterIndex++)
     {
         // Manual execution code
         if(executionMode == 1){
             green();
-            printf("Please press Enter: ");
             char ch = fgetc(stdin); //read a single character
-
+            
             if(ch == 0x0A)
             {
-                printf("ENTER KEY is pressed.\n");
             }
         }
         else // Auto mode delay
@@ -181,9 +192,8 @@ void emitterLogic(int keyValue, int executionMode)
             sleep(2);
         }
 
-
+        
         sem_wait(semStats);
-
         if(stats->stringIndex == stats->inputTextSize)
         {
             sem_post(semStats);
@@ -204,8 +214,6 @@ void emitterLogic(int keyValue, int executionMode)
             stats->emitterIndex++;
         }
         stats->valuesInMemory++;
-
-
         sem_post(semStats);
 
         sem_wait(semEmitters);
@@ -213,8 +221,10 @@ void emitterLogic(int keyValue, int executionMode)
         charArray[emitterIndex].charValue = stringFromMemory[stringIndex] ^ key;
         getDateTime(emitterIndex);
 
+        yellow();
+        printf("+-----------------------------------------------------------------------------+\n");
         cyan();
-        printf("Added %d    value in index %d   at date %s\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
+        printf("|\t %-10d \t  |  \t %-10c \t   |  %20s    |\n", charArray[emitterIndex].index, charArray[emitterIndex].charValue, charArray[emitterIndex].timeCreated);
         sem_post(semReceivers);
 
         stats->lastProcessInStats = getpid();
@@ -284,4 +294,5 @@ int main(int argc, char *argv[])
     }
     return 0;
 
+};
 };
